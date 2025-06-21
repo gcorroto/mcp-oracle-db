@@ -1,6 +1,6 @@
 {
   "name": "@grec0/mcp-oracle-db",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server para integración completa con Oracle Database",
   "license": "MIT",
   "author": "@grec0",
@@ -67,4 +67,4 @@
     "ts-jest": "^29.2.6",
     "typescript": "^5.6.2"
   }
-} 
+}
