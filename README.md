@@ -80,7 +80,7 @@ ORACLE_CLIENT_LIB_DIR=C:\oracle\instantclient_19_26
 }
 ```
 
-### Instalación General
+### Instalación General MCP EN  LOCAL (NO RECOMENDADO)
 
 1. **Instalar dependencias**:
 ```bash
@@ -118,7 +118,7 @@ npm run build
 | `ORACLE_FETCH_SIZE` | Filas a traer por lote | `100` |
 | `ORACLE_STMT_CACHE_SIZE` | Tamaño cache de statements | `30` |
 
-### Configuración MCP en Aplicaciones
+### Configuración MCP en Aplicaciones USANDO NPX (RECOMENDADO)
 
 #### Ubicación del archivo de configuración
 
