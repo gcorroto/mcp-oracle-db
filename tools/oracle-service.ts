@@ -79,9 +79,35 @@ export class OracleService {
       oracledb.maxRows = 1000;
       oracledb.fetchArraySize = this.config.fetchSize || 100;
       
-      // Configurar el directorio del cliente Oracle si está especificado
-      if (process.env.ORACLE_CLIENT_LIB_DIR) {
-        oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_LIB_DIR });
+      // Para conexiones antiguas (anteriores a 11g), usar modo Thick
+      if (process.env.ORACLE_OLD_CRYPTO === 'true') {
+        console.error('🔧 Configurando modo Thick para soporte de Oracle antiguo...');
+        
+        // Configurar el directorio del cliente Oracle
+        const libDir = process.env.ORACLE_CLIENT_LIB_DIR;
+        if (libDir) {
+          console.error(`📁 Usando Oracle Instant Client desde: ${libDir}`);
+          oracledb.initOracleClient({ libDir });
+        } else {
+          // Intentar inicializar sin directorio específico
+          try {
+            console.error('🔍 Intentando inicializar Oracle Thick sin directorio específico...');
+            oracledb.initOracleClient();
+            console.error('✅ Oracle Thick inicializado correctamente');
+          } catch (clientError: any) {
+            console.error('⚠️  ADVERTENCIA: No se pudo inicializar Oracle Thick:', clientError.message);
+            console.error('💡 SOLUCIÓN 1: Continuar con modo Thin (puede fallar con Oracle muy antiguo)');
+            console.error('💡 SOLUCIÓN 2: Instalar Oracle Instant Client y configurar ORACLE_CLIENT_LIB_DIR');
+            console.error('📖 Guía: https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html');
+            
+            // No lanzar error, continuar con modo Thin
+          }
+        }
+      } else {
+        // Configurar el directorio del cliente Oracle si está especificado (modo Thin)
+        if (process.env.ORACLE_CLIENT_LIB_DIR) {
+          oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_LIB_DIR });
+        }
       }
 
       this.isInitialized = true;
@@ -122,6 +148,15 @@ export class OracleService {
       // Usar configuraciones compatibles con versiones antiguas
       poolConfig.events = false;
       poolConfig.externalAuth = false;
+      
+      // Configuraciones adicionales para Oracle antiguo
+      poolConfig.edition = '';
+      
+      // Reducir timeouts para versiones antiguas
+      poolConfig.poolTimeout = Math.min(poolConfig.poolTimeout, 30);
+      poolConfig.queueTimeout = 10000; // 10 segundos
+      
+      console.error('Configurando pool para Oracle antiguo con crypto legacy');
     }
 
     this.pool = await oracledb.createPool(poolConfig);

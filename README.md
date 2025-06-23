@@ -74,7 +74,7 @@ npm run build
 | `ORACLE_USERNAME` | Usuario de base de datos | `hr` |
 | `ORACLE_PASSWORD` | Contraseña de base de datos | `hr` |
 | `ORACLE_CONNECTION_STRING` | Connection string completo (alternativo) | - |
-| `ORACLE_OLD_CRYPTO` | Usar criptografía antigua (pre-12c) | `false` |
+| `ORACLE_OLD_CRYPTO` | Usar modo Thick para Oracle antiguo (pre-11g) | `false` |
 | `ORACLE_POOL_MIN` | Conexiones mínimas del pool | `1` |
 | `ORACLE_POOL_MAX` | Conexiones máximas del pool | `10` |
 | `ORACLE_POOL_TIMEOUT` | Timeout del pool en segundos | `60` |
@@ -182,8 +182,9 @@ ORACLE_PASSWORD=hr
 # O usar connection string completo
 ORACLE_CONNECTION_STRING="(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)))"
 
-# Para versiones antiguas de Oracle
+# Para versiones antiguas de Oracle (pre-11g)
 ORACLE_OLD_CRYPTO=true
+ORACLE_CLIENT_LIB_DIR=/path/to/instantclient
 ```
 
 ### Configuración Basada en Java Existente
@@ -260,17 +261,84 @@ DELETE FROM temp_data WHERE processed = 'Y';
 
 ## 🔧 Solución de Problemas
 
-### Error de Criptografía (Oracle Antiguo)
-Si obtiene errores relacionados con criptografía:
+### Error NJS-116: Password Verifier Not Supported (Oracle Antiguo)
+Si obtiene el error "password verifier type 0x939 is not supported by node-oracledb in Thin mode":
+
+**Causa:** Versiones de Oracle anteriores a 11g usan verificadores de contraseña que no son compatibles con el modo Thin de node-oracledb.
+
+**Solución:**
+
+### 🚀 Paso 1: Probar sin instalaciones adicionales
 ```bash
 ORACLE_OLD_CRYPTO=true
 ```
 
-### Error de Cliente Oracle
+### 📦 Paso 2: Si falla, instalar Oracle Instant Client
+1. **Descargar Oracle Instant Client:**
+   - Windows: [Oracle Instant Client para Windows](https://www.oracle.com/database/technologies/instant-client/winx64-downloads.html)
+   - Linux: [Oracle Instant Client para Linux](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
+   - macOS: [Oracle Instant Client para macOS](https://www.oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.html)
+
+2. **Configurar la ruta:**
 ```bash
-# Instalar Oracle Instant Client
-# Configurar path de librerías
-ORACLE_CLIENT_LIB_DIR=/usr/lib/oracle/19.3/client64/lib
+ORACLE_CLIENT_LIB_DIR=/path/to/instantclient
+```
+
+### 📋 Ejemplos de configuración:
+
+**Configuración básica (probar primero):**
+```bash
+ORACLE_HOST=your-oracle-host
+ORACLE_PORT=1521
+ORACLE_SERVICE_NAME=your-service
+ORACLE_USERNAME=username
+ORACLE_PASSWORD=password
+ORACLE_OLD_CRYPTO=true
+```
+
+**Configuración con Instant Client (si es necesario):**
+```bash
+ORACLE_HOST=your-oracle-host
+ORACLE_PORT=1521
+ORACLE_SERVICE_NAME=your-service
+ORACLE_USERNAME=username
+ORACLE_PASSWORD=password
+ORACLE_OLD_CRYPTO=true
+ORACLE_CLIENT_LIB_DIR=/opt/oracle/instantclient_19_8
+```
+
+### ❓ ¿Qué es Oracle Instant Client?
+
+Oracle Instant Client son librerías nativas que permiten conexiones **Thick** (más compatibles con Oracle antiguo).
+
+**¿Cuándo es necesario?**
+- ✅ **NO necesario**: Si tu Oracle es 12c o superior
+- ⚠️ **Puede ser necesario**: Para Oracle 10g/11g con crypto antiguo
+- ❌ **Obligatorio**: Para funciones avanzadas (LDAP, conexiones wallet, etc.)
+
+**¿Cómo saber si lo necesito?**
+1. Prueba primero con `ORACLE_OLD_CRYPTO=true` solamente
+2. Si obtienes errores, entonces instala Oracle Instant Client
+
+### 📦 Instalación de Oracle Instant Client (Solo si es necesario)
+
+**Windows:**
+1. Descargar "Basic Package" desde [Oracle Downloads](https://www.oracle.com/database/technologies/instant-client/winx64-downloads.html)
+2. Extraer a `C:\oracle\instantclient_XX_Y`
+3. Configurar: `ORACLE_CLIENT_LIB_DIR=C:\oracle\instantclient_XX_Y`
+
+**Linux:**
+```bash
+# Ubuntu/Debian
+wget https://download.oracle.com/otn_software/linux/instantclient/XXX/instantclient-basic-linux.x64-XX.Y.Z.zip
+unzip instantclient-basic-linux.x64-XX.Y.Z.zip
+export ORACLE_CLIENT_LIB_DIR=/opt/oracle/instantclient_XX_Y
+```
+
+**macOS:**
+```bash
+# Descargar desde Oracle y extraer
+export ORACLE_CLIENT_LIB_DIR=/opt/oracle/instantclient_XX_Y
 ```
 
 ### Error de Conexión TNS
