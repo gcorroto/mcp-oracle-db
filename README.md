@@ -42,22 +42,58 @@ Muestra información de configuración de la conexión.
 
 ## 🛠️ Instalación
 
+### ⚠️ **IMPORTANTE: Para Oracle 9g y versiones antiguas**
+
+Si está usando Oracle 9g o versiones anteriores, debe realizar estos pasos adicionales:
+
+1. **Configurar modo compatibilidad**:
+```bash
+ORACLE_OLD_CRYPTO=true
+```
+
+2. **Descargar Oracle Instant Client 19.26** (obligatorio para Oracle 9g):
+   - **Windows**: [instantclient-basic-windows.x64-19.26.0.0.0dbru.zip](https://download.oracle.com/otn_software/nt/instantclient/1926000/instantclient-basic-windows.x64-19.26.0.0.0dbru.zip)
+   - Extraer a una carpeta (ej: `C:\oracle\instantclient_19_26`)
+   - Configurar la ruta:
+```bash
+ORACLE_CLIENT_LIB_DIR=C:\oracle\instantclient_19_26
+```
+
+3. **Configuración MCP para Oracle 9g**:
+```json
+{
+  "mcpServers": {
+    "oracle-db": {
+      "command": "npx",
+      "args": ["@grec0/mcp-oracle-db"],
+      "env": {
+        "ORACLE_HOST": "tu-host-oracle",
+        "ORACLE_PORT": "1521",
+        "ORACLE_SERVICE_NAME": "tu-servicio",
+        "ORACLE_USERNAME": "usuario",
+        "ORACLE_PASSWORD": "contraseña",
+        "ORACLE_OLD_CRYPTO": "true",
+        "ORACLE_CLIENT_LIB_DIR": "C:\\oracle\\instantclient_19_26"
+      }
+    }
+  }
+}
+```
+
+### Instalación General
+
 1. **Instalar dependencias**:
 ```bash
 npm install
 ```
 
-2. **Instalar Oracle Instant Client** (si no está instalado):
-   - Descargar desde [Oracle Instant Client](https://www.oracle.com/database/technologies/instant-client.html)
-   - Configurar variable `ORACLE_CLIENT_LIB_DIR` si es necesario
-
-3. **Configurar variables de entorno**:
+2. **Configurar variables de entorno**:
 ```bash
 cp config.example.env .env
 # Editar .env con la configuración de su base de datos
 ```
 
-4. **Compilar**:
+3. **Compilar**:
 ```bash
 npm run build
 ```
@@ -74,13 +110,13 @@ npm run build
 | `ORACLE_USERNAME` | Usuario de base de datos | `hr` |
 | `ORACLE_PASSWORD` | Contraseña de base de datos | `hr` |
 | `ORACLE_CONNECTION_STRING` | Connection string completo (alternativo) | - |
-| `ORACLE_OLD_CRYPTO` | Usar modo Thick para Oracle antiguo (pre-11g) | `false` |
+| `ORACLE_OLD_CRYPTO` | **OBLIGATORIO para Oracle 9g** - Usar modo Thick | `false` |
+| `ORACLE_CLIENT_LIB_DIR` | **OBLIGATORIO para Oracle 9g** - Ruta a Instant Client 19.26 | - |
 | `ORACLE_POOL_MIN` | Conexiones mínimas del pool | `1` |
 | `ORACLE_POOL_MAX` | Conexiones máximas del pool | `10` |
 | `ORACLE_POOL_TIMEOUT` | Timeout del pool en segundos | `60` |
 | `ORACLE_FETCH_SIZE` | Filas a traer por lote | `100` |
 | `ORACLE_STMT_CACHE_SIZE` | Tamaño cache de statements | `30` |
-| `ORACLE_CLIENT_LIB_DIR` | Directorio librerías Oracle Client | - |
 
 ### Configuración MCP en Aplicaciones
 
@@ -93,6 +129,28 @@ npm run build
 
 #### Para Claude Desktop (config.json)
 
+**Configuración para Oracle 9g (con Instant Client 19.26):**
+```json
+{
+  "mcpServers": {
+    "oracle-db": {
+      "command": "npx",
+      "args": ["@grec0/mcp-oracle-db"],
+      "env": {
+        "ORACLE_HOST": "tu-host-oracle",
+        "ORACLE_PORT": "1521",
+        "ORACLE_SERVICE_NAME": "tu-servicio",
+        "ORACLE_USERNAME": "usuario",
+        "ORACLE_PASSWORD": "contraseña",
+        "ORACLE_OLD_CRYPTO": "true",
+        "ORACLE_CLIENT_LIB_DIR": "C:\\oracle\\instantclient_19_26"
+      }
+    }
+  }
+}
+```
+
+**Configuración para Oracle 12c o superior:**
 ```json
 {
   "mcpServers": {
@@ -104,9 +162,7 @@ npm run build
         "ORACLE_PORT": "port",
         "ORACLE_SERVICE_NAME": "service",
         "ORACLE_USERNAME": "user",
-        "ORACLE_PASSWORD": "password",
-        "ORACLE_OLD_CRYPTO": "true",
-        "ORACLE_FETCH_SIZE": "size"
+        "ORACLE_PASSWORD": "password"
       }
     }
   }
@@ -261,19 +317,32 @@ DELETE FROM temp_data WHERE processed = 'Y';
 
 ## 🔧 Solución de Problemas
 
-### Error NJS-116: Password Verifier Not Supported (Oracle Antiguo)
-Si obtiene el error "password verifier type 0x939 is not supported by node-oracledb in Thin mode":
+### ⚠️ Error Oracle 9g: Password Verifier Not Supported
+Si obtiene el error "password verifier type 0x939 is not supported by node-oracledb in Thin mode" con **Oracle 9g**:
 
-**Causa:** Versiones de Oracle anteriores a 11g usan verificadores de contraseña que no son compatibles con el modo Thin de node-oracledb.
+**Solución OBLIGATORIA para Oracle 9g:**
 
-**Solución:**
+### 📦 Paso 1: Descargar Oracle Instant Client 19.26
+```bash
+# Descargar desde:
+# https://download.oracle.com/otn_software/nt/instantclient/1926000/instantclient-basic-windows.x64-19.26.0.0.0dbru.zip
 
-### 🚀 Paso 1: Probar sin instalaciones adicionales
+# Extraer a:
+C:\oracle\instantclient_19_26
+```
+
+### ⚙️ Paso 2: Configurar variables obligatorias
+```bash
+ORACLE_OLD_CRYPTO=true
+ORACLE_CLIENT_LIB_DIR=C:\oracle\instantclient_19_26
+```
+
+### 🚀 Para versiones Oracle 10g-11g: Probar sin Instant Client primero
 ```bash
 ORACLE_OLD_CRYPTO=true
 ```
 
-### 📦 Paso 2: Si falla, instalar Oracle Instant Client
+### 📦 Si falla con 10g-11g, instalar Oracle Instant Client
 1. **Descargar Oracle Instant Client:**
    - Windows: [Oracle Instant Client para Windows](https://www.oracle.com/database/technologies/instant-client/winx64-downloads.html)
    - Linux: [Oracle Instant Client para Linux](https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html)
