@@ -1,6 +1,6 @@
 {
   "name": "@grec0/mcp-oracle-db",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MCP server para integración completa con Oracle Database",
   "license": "MIT",
   "author": "@grec0",
