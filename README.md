@@ -452,6 +452,13 @@ npm test
 4. Push al branch (`git push origin feature/nueva-funcionalidad`)
 5. Crear Pull Request
 
+## Releasing
+
+Cada push a `main` genera automáticamente una versión patch en CI.
+Para una versión minor, ejecuta `npm run release:minor`.
+Para una versión major, ejecuta `npm run release:major`.
+La publicación en npm se realiza exclusivamente desde CI.
+
 ## 📄 Licencia
 
 MIT License - ver [LICENSE](LICENSE) para más detalles.
