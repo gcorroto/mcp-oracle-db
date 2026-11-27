@@ -17,4 +17,4 @@
 ## 3. Verificación integrada
 
 - [x] 3.1 Ejecutar `npm run build`, `npm test` y `npm run check` con dependencias instaladas; resolver errores y registrar resultados, indicando si las pruebas de Oracle real no se ejecutaron.
-- [ ] 3.2 Buscar referencias al SDK anterior en código, tests, scripts y `package.json`, y marcas del codemod; verificar que no quedan, que no se modificaron Jenkins ni el flujo de publicación y resumir en la issue el codemod, ajustes manuales, Node16 y sorpresas.
+- [x] 3.2 Buscar referencias al SDK anterior en código, tests, scripts y `package.json`, y marcas del codemod; verificar que no quedan, que no se modificaron Jenkins ni el flujo de publicación y resumir en la issue el codemod, ajustes manuales, Node16 y sorpresas.
