@@ -434,7 +434,7 @@ npm test
 ## 📖 Compatibilidad
 
 - **Oracle Database**: 11g, 12c, 18c, 19c, 21c
-- **Node.js**: >=18.0.0
+- **Node.js**: >=20
 - **Sistemas**: Windows, Linux, macOS
 
 ## 🔐 Seguridad
